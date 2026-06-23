@@ -46,6 +46,7 @@ You will design a Protobuf contract, publish it to Anypoint Exchange, scaffold a
 # Lab Objective
 
 The goal of this lab is to demonstrate that MuleSoft gRPC support is not just about consuming an external gRPC service.
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/141b8202-1b41-428a-89e0-2cfbee3b0193" />
 
 The target message is:
 
@@ -73,6 +74,7 @@ You will build a gRPC service called:
 ```text
 orders.v1.OrderTrackingService
 ```
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/dee66bde-9779-48a4-a80b-3c3348e93863" />
 
 It exposes two RPC methods:
 
