@@ -347,8 +347,8 @@ This lab assumes:
 Runtime Fabric namespace: rtf
 Ingress controller namespace: ingress-nginx
 Ingress class: nginx
-Base domain: apps.example.com
-gRPC hostname: orders.apps.example.com
+Base domain: apps.muleaceacademy.com
+gRPC hostname: orders.apps.muleaceacademy.com
 TLS secret name: grpc-wildcard-tls
 Mule app port: 8081
 ```
@@ -903,8 +903,8 @@ Set environment variables for your lab:
 ```bash
 export RTF_NAMESPACE=rtf
 export INGRESS_NAMESPACE=ingress-nginx
-export GRPC_BASE_DOMAIN=apps.example.com
-export GRPC_HOST=orders.apps.example.com
+export GRPC_BASE_DOMAIN=apps.muleaceacademy.com
+export GRPC_HOST=orders.apps.muleaceacademy.com
 export TLS_SECRET_NAME=grpc-wildcard-tls
 ```
 
@@ -937,7 +937,7 @@ kubectl -n ${INGRESS_NAMESPACE} get svc
 Example DNS mapping:
 
 ```text
-orders.apps.example.com → NGINX Ingress Controller LoadBalancer DNS name
+orders.apps.muleaceacademy.com → NGINX Ingress Controller LoadBalancer DNS name
 ```
 
 ---
@@ -1033,13 +1033,13 @@ Your certificate must include the public gRPC hostname.
 For this lab:
 
 ```text
-orders.apps.example.com
+orders.apps.muleaceacademy.com
 ```
 
 A wildcard certificate also works:
 
 ```text
-*.apps.example.com
+*.apps.muleaceacademy.com
 ```
 
 ---
@@ -1060,7 +1060,7 @@ metadata:
   namespace: rtf
 spec:
   baseEndpoints:
-    - https://*.apps.example.com
+    - https://*.apps.muleaceacademy.com
 
   resources:
     - |
@@ -1159,7 +1159,7 @@ In Runtime Manager:
 8. Select the base endpoint:
 
 ```text
-https://*.apps.example.com
+https://*.apps.muleaceacademy.com
 ```
 
 9. Set subdomain:
@@ -1177,7 +1177,7 @@ orders
 Expected public endpoint:
 
 ```text
-https://orders.apps.example.com
+https://orders.apps.muleaceacademy.com
 ```
 
 11. Add JVM argument:
@@ -1258,7 +1258,7 @@ annotations:
 ```yaml
 tls:
   - hosts:
-      - orders.apps.example.com
+      - orders.apps.muleaceacademy.com
     secretName: grpc-wildcard-tls
 ```
 
@@ -1278,8 +1278,8 @@ Run:
 
 ```bash
 openssl s_client \
-  -connect orders.apps.example.com:443 \
-  -servername orders.apps.example.com \
+  -connect orders.apps.muleaceacademy.com:443 \
+  -servername orders.apps.muleaceacademy.com \
   -alpn h2 < /dev/null 2>/dev/null | grep ALPN
 ```
 
@@ -1312,7 +1312,7 @@ grpcurl -vv \
   -import-path ./api \
   -proto order-tracking.proto \
   -d '{"order_id":"ORD-1042"}' \
-  orders.apps.example.com:443 \
+  orders.apps.muleaceacademy.com:443 \
   orders.v1.OrderTrackingService/GetOrderStatus
 ```
 
@@ -1333,7 +1333,7 @@ grpcurl -vv \
   -import-path ./api \
   -proto order-tracking.proto \
   -d '{"order_id":"ORD-1042"}' \
-  orders.apps.example.com:443 \
+  orders.apps.muleaceacademy.com:443 \
   orders.v1.OrderTrackingService/StreamOrderEvents
 ```
 
@@ -1366,7 +1366,7 @@ grpcurl -insecure \
   -import-path ./api \
   -proto order-tracking.proto \
   -d '{"order_id":"ORD-1042"}' \
-  orders.apps.example.com:443 \
+  orders.apps.muleaceacademy.com:443 \
   orders.v1.OrderTrackingService/GetOrderStatus
 ```
 
@@ -1430,7 +1430,7 @@ use-http2: "true"
 Check DNS:
 
 ```bash
-nslookup orders.apps.example.com
+nslookup orders.apps.muleaceacademy.com
 ```
 
 Check ingress controller service:
