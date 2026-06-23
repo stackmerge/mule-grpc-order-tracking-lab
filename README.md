@@ -171,7 +171,7 @@ Example response stream:
 │                         Runtime Fabric on Amazon EKS                        │
 │                                                                             │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │ Mule 4.11+ Application                                              │  │
+│   │ Mule 4.11+ Application                                              │   │
 │   │                                                                     │   │
 │   │  HTTP Listener with HTTP/2 enabled                                  │   │
 │   │        ↓                                                            │   │
