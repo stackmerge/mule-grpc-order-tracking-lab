@@ -151,27 +151,27 @@ Example response stream:
 
 ```text
                               ┌─────────────────────────────┐
-                              │        gRPC Client           │
-                              │  grpcurl / app / service     │
+                              │        gRPC Client          │
+                              │  grpcurl / app / service    │
                               └──────────────┬──────────────┘
                                              │
                                              │ TLS + HTTP/2
                                              │ ALPN negotiates h2
                                              ▼
                               ┌─────────────────────────────┐
-                              │  NGINX Ingress Controller    │
-                              │  TLS termination             │
-                              │  backend-protocol: GRPC      │
+                              │  NGINX Ingress Controller   │
+                              │  TLS termination            │
+                              │  backend-protocol: GRPC     │
                               └──────────────┬──────────────┘
                                              │
                                              │ gRPC over HTTP/2 cleartext
                                              │ h2c to backend service
                                              ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Runtime Fabric on Amazon EKS                         │
+│                         Runtime Fabric on Amazon EKS                        │
 │                                                                             │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │ Mule 4.11+ Application                                               │   │
+│   │ Mule 4.11+ Application                                              │  │
 │   │                                                                     │   │
 │   │  HTTP Listener with HTTP/2 enabled                                  │   │
 │   │        ↓                                                            │   │
