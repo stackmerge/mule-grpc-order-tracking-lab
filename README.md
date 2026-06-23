@@ -151,42 +151,7 @@ Example response stream:
 
 # Architecture
 
-```text
-                              ┌─────────────────────────────┐
-                              │        gRPC Client          │
-                              │  grpcurl / app / service    │
-                              └──────────────┬──────────────┘
-                                             │
-                                             │ TLS + HTTP/2
-                                             │ ALPN negotiates h2
-                                             ▼
-                              ┌─────────────────────────────┐
-                              │  NGINX Ingress Controller   │
-                              │  TLS termination            │
-                              │  backend-protocol: GRPC     │
-                              └──────────────┬──────────────┘
-                                             │
-                                             │ gRPC over HTTP/2 cleartext
-                                             │ h2c to backend service
-                                             ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Runtime Fabric on Amazon EKS                        │
-│                                                                             │
-│   ┌─────────────────────────────────────────────────────────────────────┐   │
-│   │ Mule 4.11+ Application                                              │   │
-│   │                                                                     │   │
-│   │  HTTP Listener with HTTP/2 enabled                                  │   │
-│   │        ↓                                                            │   │
-│   │  APIkit for gRPC Server Config                                      │   │
-│   │        ↓                                                            │   │
-│   │  Generated RPC Flows                                                │   │
-│   │        ↓                                                            │   │
-│   │  OrderTrackingService                                               │   │
-│   │   - GetOrderStatus      Unary RPC                                   │   │
-│   │   - StreamOrderEvents   Server-streaming RPC                        │   │
-│   └─────────────────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/fd8d3b12-54ac-42ad-ba0b-4253e304d41f" />
 
 ---
 
