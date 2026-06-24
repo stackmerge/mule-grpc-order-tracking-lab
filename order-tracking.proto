@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package orders.v1;
+
+service OrderTrackingService {
+  rpc GetOrderStatus (OrderStatusRequest) returns (OrderStatusResponse);
+  rpc StreamOrderEvents (OrderEventsRequest) returns (stream OrderEvent);
+}
+
+message OrderStatusRequest {
+  string order_id = 1;
+}
+
+message OrderStatusResponse {
+  string order_id = 1;
+  string status = 2;
+  string estimated_delivery = 3;
+}
+
+message OrderEventsRequest {
+  string order_id = 1;
+}
+
+message OrderEvent {
+  string event_type = 1;
+  string event_time = 2;
+  string message = 3;
+}
