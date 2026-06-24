@@ -173,20 +173,7 @@ HTTP/2 = required transport for gRPC
 API Governance = contract governance
 API Manager / Gateway layer = API management and policy positioning
 ```
-
-Use this phrasing in the video or lab:
-
-> CloudHub 2.0 is not the focus of this lab. For native MuleSoft gRPC APIs, this demo uses Runtime Fabric because gRPC requires HTTP/2-capable ingress and Runtime Fabric is the documented deployment path for this use case.
-
-Do not say:
-
-```text
-CloudHub 2.0 does not support HTTP/2.
-```
-
-That is too broad and not the right architectural statement.
-
-Say this instead:
+---
 
 ```text
 CloudHub 2.0 is not currently positioned as the deployment target for this native gRPC APIkit lab. We are using Runtime Fabric on EKS with HTTP/2 ingress.
