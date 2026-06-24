@@ -296,9 +296,9 @@ This lab assumes:
 Runtime Fabric namespace: rtf
 Ingress controller namespace: ingress-nginx
 Ingress class: nginx
-Base domain: apps.muleaceacademy.com
-gRPC hostname: orders.apps.muleaceacademy.com
-TLS secret name: grpc-wildcard-tls
+Base domain: grpc.muleaceacademy.com
+gRPC hostname: orders.grpc.muleaceacademy.com
+TLS secret name: grpc-muleaceacademy-tls
 Mule app port: 8081
 ```
 
@@ -846,9 +846,9 @@ Set environment variables for your lab:
 ```bash
 export RTF_NAMESPACE=rtf
 export INGRESS_NAMESPACE=ingress-nginx
-export GRPC_BASE_DOMAIN=apps.muleaceacademy.com
-export GRPC_HOST=orders.apps.muleaceacademy.com
-export TLS_SECRET_NAME=grpc-wildcard-tls
+export GRPC_BASE_DOMAIN=grpc.muleaceacademy.com
+export GRPC_HOST=orders.grpc.muleaceacademy.com
+export TLS_SECRET_NAME=grpc-muleaceacademy-tls
 ```
 
 Verify Runtime Fabric namespace:
@@ -880,7 +880,7 @@ kubectl -n ${INGRESS_NAMESPACE} get svc
 Example DNS mapping:
 
 ```text
-orders.apps.muleaceacademy.com → NGINX Ingress Controller LoadBalancer DNS name
+orders.grpc.muleaceacademy.com → NGINX Ingress Controller LoadBalancer DNS name
 ```
 
 ---
@@ -945,11 +945,103 @@ kubectl -n ${INGRESS_NAMESPACE} rollout status deployment ingress-nginx-controll
 
 Create a TLS secret in the Runtime Fabric namespace.
 
+## Generate TLS Certificate for `*.grpc.muleaceacademy.com`
+
+This section creates a self-signed wildcard TLS certificate for gRPC endpoints such as:
+
+* `orders.grpc.muleaceacademy.com`
+* `tracking.grpc.muleaceacademy.com`
+* `payments.grpc.muleaceacademy.com`
+
+> **Note:** This certificate is intended for development, testing, or internal environments. Use a CA-signed certificate for production.
+
+### 1. Create a Certificate Directory
+
 ```bash
-kubectl -n ${RTF_NAMESPACE} create secret tls ${TLS_SECRET_NAME} \
-  --cert=./certs/tls.crt \
-  --key=./certs/tls.key
+mkdir -p ~/grpc-tls
+cd ~/grpc-tls
 ```
+
+### 2. Generate `tls.crt` and `tls.key`
+
+```bash
+openssl req -x509 -nodes -newkey rsa:4096 \
+  -keyout tls.key \
+  -out tls.crt \
+  -sha256 \
+  -days 365 \
+  -subj "/C=IN/ST=Tamil Nadu/L=Chennai/O=Mule Ace Academy/OU=Platform/CN=*.grpc.muleaceacademy.com" \
+  -addext "subjectAltName=DNS:*.grpc.muleaceacademy.com,DNS:grpc.muleaceacademy.com" \
+  -addext "keyUsage=critical,digitalSignature,keyEncipherment" \
+  -addext "extendedKeyUsage=serverAuth"
+```
+
+This command generates:
+
+```text
+tls.crt   # Public TLS certificate
+tls.key   # Private TLS key
+```
+
+### 3. Secure the Private Key
+
+```bash
+chmod 600 tls.key
+```
+
+### 4. Validate Certificate Details
+
+Verify the wildcard domain and Subject Alternative Name (SAN) entries:
+
+```bash
+openssl x509 -in tls.crt -text -noout | grep -A2 "Subject Alternative Name"
+```
+
+Expected output:
+
+```text
+DNS:*.grpc.muleaceacademy.com
+DNS:grpc.muleaceacademy.com
+```
+
+### 5. Create Kubernetes TLS Secret
+
+Create the `rtf` namespace if it does not already exist:
+
+```bash
+kubectl create namespace rtf --dry-run=client -o yaml | kubectl apply -f -
+```
+
+Create the TLS secret:
+
+```bash
+kubectl create secret tls grpc-muleaceacademy-tls \
+  --cert=tls.crt \
+  --key=tls.key \
+  -n rtf
+```
+
+Verify the secret:
+
+```bash
+kubectl get secret grpc-muleaceacademy-tls -n rtf
+```
+
+### 6. Reference the Secret in an Ingress Resource
+
+```yaml
+spec:
+  tls:
+    - hosts:
+        - "*.grpc.muleaceacademy.com"
+        - "grpc.muleaceacademy.com"
+      secretName: grpc-muleaceacademy-tls
+```
+
+> `*.grpc.muleaceacademy.com` covers one-level subdomains such as `orders.grpc.muleaceacademy.com`.
+>
+> It does not automatically cover `grpc.muleaceacademy.com`, which is why that hostname is included separately in the SAN list.
+
 
 Label it so Runtime Fabric can synchronize it into application namespaces:
 
@@ -976,13 +1068,13 @@ Your certificate must include the public gRPC hostname.
 For this lab:
 
 ```text
-orders.apps.muleaceacademy.com
+orders.grpc.muleaceacademy.com
 ```
 
 A wildcard certificate also works:
 
 ```text
-*.apps.muleaceacademy.com
+*.grpc.muleaceacademy.com
 ```
 
 ---
@@ -1003,7 +1095,7 @@ metadata:
   namespace: rtf
 spec:
   baseEndpoints:
-    - https://*.apps.muleaceacademy.com
+    - https://*.grpc.muleaceacademy.com
 
   resources:
     - |
@@ -1023,7 +1115,7 @@ spec:
         tls:
           - hosts:
               - {{ .Host }}
-            secretName: grpc-wildcard-tls
+            secretName: grpc-muleaceacademy-tls
         rules:
           - host: {{ .Host }}
             http:
@@ -1102,7 +1194,7 @@ In Runtime Manager:
 8. Select the base endpoint:
 
 ```text
-https://*.apps.muleaceacademy.com
+https://*.grpc.muleaceacademy.com
 ```
 
 9. Set subdomain:
@@ -1120,7 +1212,7 @@ orders
 Expected public endpoint:
 
 ```text
-https://orders.apps.muleaceacademy.com
+https://orders.grpc.muleaceacademy.com
 ```
 
 11. Add JVM argument:
@@ -1201,8 +1293,8 @@ annotations:
 ```yaml
 tls:
   - hosts:
-      - orders.apps.muleaceacademy.com
-    secretName: grpc-wildcard-tls
+      - orders.grpc.muleaceacademy.com
+    secretName: grpc-muleaceacademy-tls
 ```
 
 ```yaml
@@ -1221,8 +1313,8 @@ Run:
 
 ```bash
 openssl s_client \
-  -connect orders.apps.muleaceacademy.com:443 \
-  -servername orders.apps.muleaceacademy.com \
+  -connect orders.grpc.muleaceacademy.com:443 \
+  -servername orders.grpc.muleaceacademy.com \
   -alpn h2 < /dev/null 2>/dev/null | grep ALPN
 ```
 
@@ -1255,7 +1347,7 @@ grpcurl -vv \
   -import-path ./api \
   -proto order-tracking.proto \
   -d '{"order_id":"ORD-1042"}' \
-  orders.apps.muleaceacademy.com:443 \
+  orders.grpc.muleaceacademy.com:443 \
   orders.v1.OrderTrackingService/GetOrderStatus
 ```
 
@@ -1276,7 +1368,7 @@ grpcurl -vv \
   -import-path ./api \
   -proto order-tracking.proto \
   -d '{"order_id":"ORD-1042"}' \
-  orders.apps.muleaceacademy.com:443 \
+  orders.grpc.muleaceacademy.com:443 \
   orders.v1.OrderTrackingService/StreamOrderEvents
 ```
 
@@ -1309,7 +1401,7 @@ grpcurl -insecure \
   -import-path ./api \
   -proto order-tracking.proto \
   -d '{"order_id":"ORD-1042"}' \
-  orders.apps.muleaceacademy.com:443 \
+  orders.grpc.muleaceacademy.com:443 \
   orders.v1.OrderTrackingService/GetOrderStatus
 ```
 
@@ -1373,7 +1465,7 @@ use-http2: "true"
 Check DNS:
 
 ```bash
-nslookup orders.apps.muleaceacademy.com
+nslookup orders.grpc.muleaceacademy.com
 ```
 
 Check ingress controller service:
@@ -1559,13 +1651,13 @@ Use the file and path generated by APIkit.
 Verify the source secret:
 
 ```bash
-kubectl -n rtf get secret grpc-wildcard-tls
+kubectl -n rtf get secret grpc-muleaceacademy-tls
 ```
 
 Verify label:
 
 ```bash
-kubectl -n rtf get secret grpc-wildcard-tls --show-labels
+kubectl -n rtf get secret grpc-muleaceacademy-tls --show-labels
 ```
 
 Expected:
@@ -1577,7 +1669,7 @@ rtf.mulesoft.com/synchronized=true
 Verify the app namespace:
 
 ```bash
-kubectl -n ${APP_NAMESPACE} get secret grpc-wildcard-tls
+kubectl -n ${APP_NAMESPACE} get secret grpc-muleaceacademy-tls
 ```
 
 If it is missing, confirm Runtime Fabric secret synchronization and redeploy the app if needed.
@@ -1705,7 +1797,7 @@ kubectl -n rtf delete httproutetemplate grpc-nginx-route
 Delete the TLS secret only if it was created only for this lab:
 
 ```bash
-kubectl -n rtf delete secret grpc-wildcard-tls
+kubectl -n rtf delete secret grpc-muleaceacademy-tls
 ```
 
 
