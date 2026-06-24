@@ -98,11 +98,7 @@
 
     <logger
         level="INFO"
-        message="STREAM-2: Protobuf payload built. Sending first event." />
-
-    <logger
-        level="INFO"
-        message="STREAM-3: First event sent. Closing stream." />
+        message="STREAM-2: Event sent. Closing stream." />
 
     <grpc:end-stream
         config-ref="GRPC_Server_Config"
