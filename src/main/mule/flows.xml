@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:grpc="http://www.mulesoft.org/schema/mule/grpc"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+                          http://www.mulesoft.org/schema/mule/grpc http://www.mulesoft.org/schema/mule/grpc/current/mule-grpc.xsd
+                          http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+  <!-- =========================================================
+       Unary RPC: GetOrderStatus
+       ========================================================= -->
+  <flow name="GetOrderStatus_Operation">
+    <grpc:unary-method
+            config-ref="GRPC_Server_Config"
+            methodName="orders.v1.OrderTrackingService/GetOrderStatus"/>
+    <set-variable doc:name="Set variable" doc:id="renwch" variableName="order_id" value="payload.order_id"/>
+
+        <ee:transform doc:name="Serialize OrderStatusResponse as Protobuf">
+            <ee:message>
+                <ee:set-payload><![CDATA[
+    %dw 2.0
+    output application/x-protobuf
+    messageType="orders.v1.OrderStatusResponse",
+    descriptorUrl="classpath://${grpc.server.descriptor.file}"
+    ---
+    {
+    order_id: payload.order_id,
+    status: "IN_TRANSIT",
+    estimated_delivery: "2026-06-24"
+    }
+                ]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+  </flow>
+
+  <!-- =========================================================
+       Server-Streaming: StreamOrderEvents
+       ========================================================= -->
+  <flow name="StreamOrderEvents_Operation">
+    <grpc:server-streaming-method
+        config-ref="GRPC_Server_Config"
+        methodName="orders.v1.OrderTrackingService/StreamOrderEvents"
+        onCapacityOverload="DROP" doc:name="Server-streaming-method"/>
+
+       <!-- Keep the connection attributes for send/end operations -->
+    <set-variable
+        variableName="grpcStreamAttributes"
+        value="#[attributes]" />
+
+    <logger
+        level="INFO"
+        message="STREAM-1: Request received. Building first OrderEvent." />
+
+    <set-variable
+        variableName="events"
+        value="#[
+            [
+                {
+                    event_type: 'PICKED_UP',
+                    event_time: '2026-06-23T09:00:00Z',
+                    message: 'Package collected from warehouse'
+                },
+                {
+                    event_type: 'IN_TRANSIT',
+                    event_time: '2026-06-23T11:30:00Z',
+                    message: 'Package is moving through the carrier network'
+                },
+                {
+                    event_type: 'OUT_FOR_DELIVERY',
+                    event_time: '2026-06-24T08:00:00Z',
+                    message: 'Package is out for delivery'
+                }
+            ]
+        ]" />
+        <foreach doc:name="Foreach" doc:id="zhqete" collection="#[vars.events]">
+      <ee:transform doc:name="Serialize OrderEvent as Protobuf">
+              <ee:message>
+                  <ee:set-payload><![CDATA[
+                      %dw 2.0
+                      output application/x-protobuf
+                      messageType="orders.v1.OrderEvent",
+                      descriptorUrl="classpath://${grpc.server.descriptor.file}"
+                      ---
+                      {
+                      event_type: payload.event_type,
+                      event_time: payload.event_time,
+                      message: payload.message
+                      }
+                  ]]></ee:set-payload>
+              </ee:message>
+          </ee:transform>
+      <grpc:send-stream-message
+              config-ref="GRPC_Server_Config"
+              attributes="#[vars.grpcStreamAttributes]" />
+            
+        </foreach>
+
+    <logger
+        level="INFO"
+        message="STREAM-2: Protobuf payload built. Sending first event." />
+
+    <logger
+        level="INFO"
+        message="STREAM-3: First event sent. Closing stream." />
+
+    <grpc:end-stream
+        config-ref="GRPC_Server_Config"
+        attributes="#[vars.grpcStreamAttributes]" />
+  </flow>
+        
+</mule>
