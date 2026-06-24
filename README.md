@@ -569,7 +569,7 @@ Configure Mule to use NETTY for HTTP/2.
 For local runs, add this JVM property:
 
 ```text
--Dmule.http.service.implementation=NETTY
+-M-Dmule.http.service.implementation=NETTY
 ```
 
 For Runtime Fabric deployment, add the same JVM property in Runtime Manager:
@@ -597,30 +597,22 @@ Add business logic after the generated source.
 Example implementation:
 
 ```xml
-<flow name="get-order-status-flow">
-
     <grpc:unary-method
         config-ref="GRPC_Server_Config"
-        methodName="orders.v1.OrderTrackingService/GetOrderStatus" />
+        methodName="orders.v1.OrderTrackingService/GetOrderStatus"/>
 
-    <choice>
-        <when expression="#[isEmpty(payload.order_id default '')]">
-            <raise-error
-                type="GRPC:INVALID_ARGUMENT"
-                description="order_id is required" />
-        </when>
-    </choice>
-
-    <ee:transform doc:name="Build Order Status Response">
+    <ee:transform doc:name="Serialize OrderStatusResponse as Protobuf">
         <ee:message>
             <ee:set-payload><![CDATA[
 %dw 2.0
-output application/java
+output application/x-protobuf
+  messageType="orders.v1.OrderStatusResponse",
+  descriptorUrl="classpath://grpc/<Add name of proto binary file here>.protobin"
 ---
 {
-    order_id: payload.order_id,
-    status: "IN_TRANSIT",
-    estimated_delivery: "2026-06-24"
+  order_id: payload.order_id,
+  status: "IN_TRANSIT",
+  estimated_delivery: "2026-06-24"
 }
             ]]></ee:set-payload>
         </ee:message>
