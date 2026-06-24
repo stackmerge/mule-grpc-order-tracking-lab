@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:grpc="http://www.mulesoft.org/schema/mule/grpc" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/grpc http://www.mulesoft.org/schema/mule/grpc/current/mule-grpc.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+  <http:listener-config name="HTTP_Listener_config">
+    <http:listener-connection host="${grpc.server.host}" port="${grpc.server.port}" protocol="HTTP">
+      <http:protocol-support>
+        <http:http1-support enable="false" />
+        <http:http2-support enable="true" />
+      </http:protocol-support>
+    </http:listener-connection>
+  </http:listener-config>
+  <grpc:server-config name="GRPC_Server_Config">
+    <grpc:grpc-server-connection listenerConfig="HTTP_Listener_config">
+      <grpc:idl-definition>
+        <grpc:single-binary-protobuf protobufDescriptorFile="${grpc.server.descriptor.file}" />
+      </grpc:idl-definition>
+    </grpc:grpc-server-connection>
+  </grpc:server-config>
+  <configuration-properties file="${env}-properties.properties" />
+  <global-property name="env" value="dev" />
+</mule>
