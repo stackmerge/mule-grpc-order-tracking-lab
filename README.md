@@ -39,7 +39,6 @@ You will design a Protobuf contract, publish it to Anypoint Exchange, scaffold a
 27. [Production Hardening Checklist](#production-hardening-checklist)
 28. [Acceptance Criteria](#acceptance-criteria)
 29. [Cleanup](#cleanup)
-30. [Suggested Demo Script Flow](#suggested-demo-script-flow)
 
 ---
 
@@ -1724,97 +1723,4 @@ Delete the TLS secret only if it was created only for this lab:
 kubectl -n rtf delete secret grpc-wildcard-tls
 ```
 
-Remove local build artifacts:
 
-```bash
-cd mule-app
-mvn clean
-```
-
-Unset environment variables:
-
-```bash
-unset RTF_NAMESPACE
-unset INGRESS_NAMESPACE
-unset GRPC_BASE_DOMAIN
-unset GRPC_HOST
-unset TLS_SECRET_NAME
-unset APP_NAMESPACE
-```
-
----
-
-# Suggested Demo Script Flow
-
-Use this flow for recording the video:
-
-1. Explain why REST polling is not ideal for live order tracking.
-2. Introduce gRPC and Protobuf.
-3. Show the `.proto` contract.
-4. Explain unary vs server streaming.
-5. Publish the gRPC API to Exchange.
-6. Scaffold the Mule app with APIkit for gRPC.
-7. Show generated flows and `.protobin` descriptor.
-8. Configure HTTP/2 in the Mule HTTP Listener.
-9. Implement `GetOrderStatus`.
-10. Implement `StreamOrderEvents`.
-11. Test locally with `grpcurl`.
-12. Explain Runtime Fabric and HTTP/2 ingress.
-13. Create the NGINX HTTPRouteTemplate.
-14. Deploy to Runtime Fabric on EKS.
-15. Validate ALPN with OpenSSL.
-16. Test unary RPC through the public endpoint.
-17. Test server streaming through the public endpoint.
-18. Explain Runtime Fabric vs gateway/API management positioning.
-19. End with production hardening and next steps.
-
----
-
-# Key Phrases for the Video
-
-Use these lines during recording:
-
-```text
-This is not just a gRPC connector demo. This is gRPC across the MuleSoft API lifecycle.
-```
-
-```text
-APIkit creates a Mule flow for each RPC method defined in the Protobuf contract.
-```
-
-```text
-The .protobin descriptor is the compiled contract the Mule gRPC server uses at runtime.
-```
-
-```text
-For Runtime Fabric on EKS, enabling HTTP/2 is not one checkbox. Mule must support HTTP/2, and the Kubernetes ingress must preserve gRPC traffic.
-```
-
-```text
-ALPN is the TLS handshake step where the client and ingress agree to use HTTP/2.
-```
-
-```text
-Unary working does not prove streaming is configured correctly.
-```
-
-```text
-Runtime Fabric runs the Mule gRPC service. The gateway layer is where you position centralized policy enforcement.
-```
-
----
-
-# Next Enhancements
-
-After completing this lab, extend it with:
-
-1. Client-streaming RPC for batch order updates.
-2. Bidirectional streaming for live driver or delivery telemetry.
-3. Kafka-backed order event streaming.
-4. OAuth or mTLS security.
-5. MUnit tests for unary and streaming flows.
-6. API Governance rules for Protobuf naming and versioning.
-7. Observability with distributed tracing.
-8. Flex Gateway or another gateway layer for centralized policy enforcement.
-9. Load testing for concurrent streams.
-10. A real backend integration with SAP, OMS, or carrier tracking APIs.
