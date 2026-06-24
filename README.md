@@ -589,7 +589,7 @@ Example implementation:
 %dw 2.0
 output application/x-protobuf
   messageType="orders.v1.OrderStatusResponse",
-  descriptorUrl="classpath://grpc/<Add name of proto binary file here>.protobin"
+  descriptorUrl="classpath://grpc/${grpc.server.descriptor.file}"
 ---
 {
   order_id: payload.order_id,
@@ -699,7 +699,9 @@ Example flow:
             <ee:message>
                 <ee:set-payload><![CDATA[
 %dw 2.0
-output application/java
+output application/x-protobuf
+  messageType="orders.v1.OrderEvent",
+  descriptorUrl="classpath://grpc/${grpc.server.descriptor.file}"
 ---
 {
     event_type: payload.event_type,
