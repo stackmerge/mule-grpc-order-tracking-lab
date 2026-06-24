@@ -236,10 +236,6 @@ gRPC traffic starts over HTTP/2
 
 If ALPN does not negotiate `h2` at the public TLS endpoint, the client may fall back to HTTP/1.1 or fail the gRPC connection.
 
-For the video, say:
-
-> ALPN is the TLS handshake step where the client and ingress agree to use HTTP/2, which gRPC requires.
-
 ---
 
 # Prerequisites
