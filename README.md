@@ -589,7 +589,7 @@ Example implementation:
 %dw 2.0
 output application/x-protobuf
   messageType="orders.v1.OrderStatusResponse",
-  descriptorUrl="classpath://grpc/${grpc.server.descriptor.file}"
+  descriptorUrl="classpath://${grpc.server.descriptor.file}"
 ---
 {
   order_id: payload.order_id,
@@ -701,7 +701,7 @@ Example flow:
 %dw 2.0
 output application/x-protobuf
   messageType="orders.v1.OrderEvent",
-  descriptorUrl="classpath://grpc/${grpc.server.descriptor.file}"
+  descriptorUrl="classpath://${grpc.server.descriptor.file}"
 ---
 {
     event_type: payload.event_type,
