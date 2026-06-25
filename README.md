@@ -14,7 +14,7 @@ You will design a Protobuf contract, publish it to Anypoint Exchange, scaffold a
 2. [What You Will Build](#what-you-will-build)
 3. [Architecture](#architecture)
 4. [Important Deployment Positioning](#important-deployment-positioning)
-5. [gRPC, HTTP/2, and ALPN](#grpc-http2-and-alpn)
+5. [gRPC,RPC Patterns, HTTP/2, and ALPN](#grpc-http2-and-alpn)
 6. [Prerequisites](#prerequisites)
 7. [Suggested Repository Structure](#suggested-repository-structure)
 8. [Create the Protobuf Contract](#create-the-protobuf-contract)
@@ -181,7 +181,7 @@ CloudHub 2.0 is not currently positioned as the deployment target for this nativ
 
 ---
 
-# gRPC, HTTP/2, and ALPN
+# gRPC, RPC Paterns, HTTP/2, and ALPN
 
 ## What is gRPC?
 
@@ -191,6 +191,206 @@ gRPC is a remote procedure call framework that commonly uses:
 Protobuf for contract and serialization
 HTTP/2 for transport
 Typed RPC methods instead of REST-style resources
+```
+## gRPC RPC Communication Patterns
+
+gRPC supports four RPC communication patterns.
+
+### 1. Unary RPC
+
+**One request → One response**
+
+This is most similar to a traditional REST API call.
+
+```text
+Client → Request → Server
+Client ← Response ← Server
+```
+
+**Order Tracking example:**
+
+```protobuf
+rpc GetOrderStatus (OrderStatusRequest) returns (OrderStatusResponse);
+```
+
+**Request**
+
+```json
+{
+  "order_id": "ORD-1042"
+}
+```
+
+**Response**
+
+```json
+{
+  "status": "IN_TRANSIT"
+}
+```
+
+**Best for:**
+
+* Fetching data
+* Creating a resource
+* Validations
+* Simple backend-to-backend calls
+
+---
+
+### 2. Server Streaming RPC
+
+**One request → Multiple responses**
+
+The client sends one request, and the server continuously sends messages until it closes the stream.
+
+```text
+Client → One request → Server
+Client ← Event 1
+Client ← Event 2
+Client ← Event 3
+```
+
+**Order Tracking example:**
+
+```protobuf
+rpc StreamOrderEvents (OrderEventsRequest) returns (stream OrderEvent);
+```
+
+**Request**
+
+```json
+{
+  "order_id": "ORD-1042"
+}
+```
+
+**Server stream responses**
+
+```text
+PICKED_UP
+IN_TRANSIT
+OUT_FOR_DELIVERY
+```
+
+**Best for:**
+
+* Order tracking
+* Live shipment updates
+* Log streaming
+* Notifications
+* Price updates
+* Progress updates
+
+> This is the pattern implemented by `StreamOrderEvents`.
+
+---
+
+### 3. Client Streaming RPC
+
+**Multiple requests → One response**
+
+The client sends multiple messages through one connection. Once the client finishes sending messages, the server returns one final response.
+
+```text
+Client → Message 1
+Client → Message 2
+Client → Message 3
+Client → Stream complete
+
+Client ← Final response
+```
+
+**Example:**
+
+```protobuf
+rpc UploadOrderEvents (stream OrderEvent) returns (UploadSummary);
+```
+
+**Possible use case**
+
+A warehouse scanner sends multiple package scan events:
+
+```text
+SCAN_RECEIVED
+SCAN_SORTED
+SCAN_LOADED
+SCAN_DISPATCHED
+```
+
+**Final server response**
+
+```text
+4 events processed successfully
+```
+
+**Best for:**
+
+* Bulk uploads
+* Batch event ingestion
+* File uploads in chunks
+* IoT sensor readings
+* Mobile clients uploading offline events
+
+---
+
+### 4. Bidirectional Streaming RPC
+
+**Multiple requests ↔ Multiple responses**
+
+Both the client and server can independently send messages over the same open connection.
+
+```text
+Client → Message 1
+Server → Message 1
+Client → Message 2
+Server → Message 2
+Client → Message 3
+Server → Message 3
+```
+
+**Example:**
+
+```protobuf
+rpc TrackDelivery(stream DriverLocation) returns (stream DeliveryUpdate);
+```
+
+**Possible use case**
+
+A driver application continuously sends GPS coordinates, while the Mule service responds with:
+
+* Updated delivery instructions
+* Route changes
+* Geofence alerts
+* Delivery confirmation requests
+
+**Best for:**
+
+* Real-time chat
+* Live driver tracking
+* Trading systems
+* Multiplayer collaboration
+* IoT command-and-control
+* Interactive monitoring dashboards
+
+---
+
+### Quick Comparison
+
+| Pattern                 | Client Sends | Server Sends | Example                |
+| ----------------------- | -----------: | -----------: | ---------------------- |
+| Unary                   |            1 |            1 | Get order status       |
+| Server streaming        |            1 |         Many | Stream delivery events |
+| Client streaming        |         Many |            1 | Upload scan events     |
+| Bidirectional streaming |         Many |         Many | Live driver telemetry  |
+
+### Easy Way to Remember
+
+```text
+Unary              = 1 → 1
+Server streaming   = 1 → many
+Client streaming   = many → 1
+Bidirectional      = many ↔ many
 ```
 
 ## Why HTTP/2 Matters
