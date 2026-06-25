@@ -13,140 +13,7 @@ You will design a Protobuf contract, publish it to Anypoint Exchange, scaffold a
 The goal of this lab is to demonstrate that MuleSoft gRPC support is not just about consuming an external gRPC service.
 <img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/141b8202-1b41-428a-89e0-2cfbee3b0193" />
 
-The target message is:
-
-> MuleSoft now supports native gRPC across the API lifecycle: design, governance, Exchange publishing, APIkit scaffolding, Mule implementation, Runtime Fabric deployment, and API management positioning.
-
-This lab focuses on a realistic backend-to-backend use case: **Order Tracking**.
-
-You will demonstrate:
-
-- Unary RPC with `GetOrderStatus`
-- Server-streaming RPC with `StreamOrderEvents`
-- Protobuf-first API design
-- APIkit-generated Mule flows
-- HTTP/2 listener configuration
-- Runtime Fabric deployment on EKS
-- HTTP/2 ingress with NGINX Ingress Controller
-- ALPN validation at the TLS edge
-
 ---
-
-# What You Will Build
-
-You will build a gRPC service called:
-
-```text
-orders.v1.OrderTrackingService
-```
-<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/dee66bde-9779-48a4-a80b-3c3348e93863" />
-
-It exposes two RPC methods:
-
-```proto
-service OrderTrackingService {
-  rpc GetOrderStatus (OrderStatusRequest) returns (OrderStatusResponse);
-  rpc StreamOrderEvents (OrderEventsRequest) returns (stream OrderEvent);
-}
-```
-
-## Unary RPC
-
-Unary RPC means one request and one response.
-
-```text
-Client request  →  Mule flow  →  Single response
-```
-
-Example request:
-
-```json
-{
-  "order_id": "ORD-1042"
-}
-```
-
-Example response:
-
-```json
-{
-  "order_id": "ORD-1042",
-  "status": "IN_TRANSIT",
-  "estimated_delivery": "2026-06-24"
-}
-```
-
-## Server-Streaming RPC
-
-Server streaming means the client sends one request, and the server sends multiple response messages over the same connection.
-
-```text
-Client request  →  Mule flow  →  Event 1
-                              →  Event 2
-                              →  Event 3
-```
-
-Example response stream:
-
-```json
-{
-  "event_type": "PICKED_UP",
-  "event_time": "2026-06-23T09:00:00Z",
-  "message": "Package collected from warehouse"
-}
-```
-
-```json
-{
-  "event_type": "IN_TRANSIT",
-  "event_time": "2026-06-23T11:30:00Z",
-  "message": "Package is moving through the carrier network"
-}
-```
-
-```json
-{
-  "event_type": "OUT_FOR_DELIVERY",
-  "event_time": "2026-06-24T08:00:00Z",
-  "message": "Package is out for delivery"
-}
-```
-
----
-
-# Architecture
-
-<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/fd8d3b12-54ac-42ad-ba0b-4253e304d41f" />
-
----
-
-# Important Deployment Positioning
-
-Do **not** frame this as a CloudHub 2.0 deployment tutorial.
-
-For this native gRPC APIkit lab, the deployment target is:
-
-```text
-Runtime Fabric on Amazon EKS
-```
-
-The important positioning is:
-
-```text
-Runtime Fabric = Mule runtime hosting layer
-NGINX Ingress = Kubernetes ingress layer
-HTTP/2 = required transport for gRPC
-API Governance = contract governance
-API Manager / Gateway layer = API management and policy positioning
-```
----
-
-```text
-CloudHub 2.0 is not currently positioned as the deployment target for this native gRPC APIkit lab. We are using Runtime Fabric on EKS with HTTP/2 ingress.
-```
-
----
-
 # gRPC, RPC Paterns, HTTP/2, and ALPN
 
 ## What is gRPC?
@@ -158,6 +25,7 @@ Protobuf for contract and serialization
 HTTP/2 for transport
 Typed RPC methods instead of REST-style resources
 ```
+
 ## gRPC RPC Communication Patterns
 
 gRPC supports four RPC communication patterns.
@@ -383,6 +251,109 @@ gRPC traffic starts over HTTP/2
 ```
 
 If ALPN does not negotiate `h2` at the public TLS endpoint, the client may fall back to HTTP/1.1 or fail the gRPC connection.
+
+---
+
+This lab focuses on a realistic backend-to-backend use case: **Order Tracking**.
+
+You will demonstrate:
+
+- Unary RPC with `GetOrderStatus`
+- Server-streaming RPC with `StreamOrderEvents`
+- Protobuf-first API design
+- APIkit-generated Mule flows
+- HTTP/2 listener configuration
+- Runtime Fabric deployment on EKS
+- HTTP/2 ingress with NGINX Ingress Controller
+- ALPN validation at the TLS edge
+
+---
+
+# What You Will Build
+
+You will build a gRPC service called:
+
+```text
+orders.v1.OrderTrackingService
+```
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/dee66bde-9779-48a4-a80b-3c3348e93863" />
+
+It exposes two RPC methods:
+
+```proto
+service OrderTrackingService {
+  rpc GetOrderStatus (OrderStatusRequest) returns (OrderStatusResponse);
+  rpc StreamOrderEvents (OrderEventsRequest) returns (stream OrderEvent);
+}
+```
+
+## Unary RPC
+
+Unary RPC means one request and one response.
+
+```text
+Client request  →  Mule flow  →  Single response
+```
+
+Example request:
+
+```json
+{
+  "order_id": "ORD-1042"
+}
+```
+
+Example response:
+
+```json
+{
+  "order_id": "ORD-1042",
+  "status": "IN_TRANSIT",
+  "estimated_delivery": "2026-06-24"
+}
+```
+
+## Server-Streaming RPC
+
+Server streaming means the client sends one request, and the server sends multiple response messages over the same connection.
+
+```text
+Client request  →  Mule flow  →  Event 1
+                              →  Event 2
+                              →  Event 3
+```
+
+Example response stream:
+
+```json
+{
+  "event_type": "PICKED_UP",
+  "event_time": "2026-06-23T09:00:00Z",
+  "message": "Package collected from warehouse"
+}
+```
+
+```json
+{
+  "event_type": "IN_TRANSIT",
+  "event_time": "2026-06-23T11:30:00Z",
+  "message": "Package is moving through the carrier network"
+}
+```
+
+```json
+{
+  "event_type": "OUT_FOR_DELIVERY",
+  "event_time": "2026-06-24T08:00:00Z",
+  "message": "Package is out for delivery"
+}
+```
+
+---
+
+# Architecture
+
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/fd8d3b12-54ac-42ad-ba0b-4253e304d41f" />
 
 ---
 
