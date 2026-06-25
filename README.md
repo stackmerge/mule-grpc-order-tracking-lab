@@ -375,24 +375,6 @@ A driver application continuously sends GPS coordinates, while the Mule service 
 
 ---
 
-### Quick Comparison
-
-| Pattern                 | Client Sends | Server Sends | Example                |
-| ----------------------- | -----------: | -----------: | ---------------------- |
-| Unary                   |            1 |            1 | Get order status       |
-| Server streaming        |            1 |         Many | Stream delivery events |
-| Client streaming        |         Many |            1 | Upload scan events     |
-| Bidirectional streaming |         Many |         Many | Live driver telemetry  |
-
-### Easy Way to Remember
-
-```text
-Unary              = 1 → 1
-Server streaming   = 1 → many
-Client streaming   = many → 1
-Bidirectional      = many ↔ many
-```
-
 ## Why HTTP/2 Matters
 
 gRPC depends on HTTP/2 features such as:
