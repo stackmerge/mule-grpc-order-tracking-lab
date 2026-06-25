@@ -8,40 +8,6 @@ You will design a Protobuf contract, publish it to Anypoint Exchange, scaffold a
 
 ---
 
-## Table of Contents
-
-1. [Lab Objective](#lab-objective)
-2. [What You Will Build](#what-you-will-build)
-3. [Architecture](#architecture)
-4. [Important Deployment Positioning](#important-deployment-positioning)
-5. [gRPC,RPC Patterns, HTTP/2, and ALPN](#grpc-http2-and-alpn)
-6. [Prerequisites](#prerequisites)
-7. [Suggested Repository Structure](#suggested-repository-structure)
-8. [Create the Protobuf Contract](#create-the-protobuf-contract)
-9. [Design, Govern, and Publish in Anypoint Code Builder](#design-govern-and-publish-in-anypoint-code-builder)
-10. [Scaffold the Mule Application with APIkit for gRPC](#scaffold-the-mule-application-with-apikit-for-grpc)
-11. [Understand the Generated Mule Project](#understand-the-generated-mule-project)
-12. [Configure HTTP/2 in Mule](#configure-http2-in-mule)
-13. [Implement the Unary RPC](#implement-the-unary-rpc)
-14. [Implement the Server-Streaming RPC](#implement-the-server-streaming-rpc)
-15. [Build and Run Locally](#build-and-run-locally)
-16. [Test Locally with grpcurl](#test-locally-with-grpcurl)
-17. [Prepare Runtime Fabric on EKS](#prepare-runtime-fabric-on-eks)
-18. [Configure HTTP/2 Ingress with NGINX](#configure-http2-ingress-with-nginx)
-19. [Create and Synchronize the TLS Secret](#create-and-synchronize-the-tls-secret)
-20. [Create the Runtime Fabric HTTPRouteTemplate](#create-the-runtime-fabric-httproutetemplate)
-21. [Deploy the Mule App to Runtime Fabric](#deploy-the-mule-app-to-runtime-fabric)
-22. [Verify Kubernetes Resources](#verify-kubernetes-resources)
-23. [Validate ALPN and HTTP/2](#validate-alpn-and-http2)
-24. [Test the Public gRPC Endpoint](#test-the-public-grpc-endpoint)
-25. [API Governance and API Manager Positioning](#api-governance-and-api-manager-positioning)
-26. [Troubleshooting Guide](#troubleshooting-guide)
-27. [Production Hardening Checklist](#production-hardening-checklist)
-28. [Acceptance Criteria](#acceptance-criteria)
-29. [Cleanup](#cleanup)
-
----
-
 # Lab Objective
 
 The goal of this lab is to demonstrate that MuleSoft gRPC support is not just about consuming an external gRPC service.
