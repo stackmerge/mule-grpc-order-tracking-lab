@@ -1919,4 +1919,9 @@ Delete the TLS secret only if it was created only for this lab:
 kubectl -n rtf delete secret grpc-muleaceacademy-tls
 ```
 
+---
+
+## Disclaimer
+
+This guide is intended for learning, proof of concept, and demo purposes. For production deployments, validate the architecture with MuleSoft and AWS best practices, security standards, sizing requirements, organizational governance, and operational readiness requirements.
 
