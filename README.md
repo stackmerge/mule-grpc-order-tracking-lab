@@ -8,6 +8,18 @@ You will design a Protobuf contract, publish it to Anypoint Exchange, scaffold a
 
 ---
 
+## YouTube Tutorial
+
+Watch the complete walkthrough here:
+
+<a href="https://www.youtube.com/watch?v=b84tCxFR3N0" target="_blank" rel="noopener noreferrer">
+  <img 
+    src="https://img.youtube.com/vi/b84tCxFR3N0/maxresdefault.jpg" 
+    alt="Watch the YouTube video" 
+    width="720"
+  />
+</a>
+
 # Lab Objective
 
 The goal of this lab is to demonstrate that MuleSoft gRPC support is not just about consuming an external gRPC service.
