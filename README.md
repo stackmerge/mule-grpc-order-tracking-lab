@@ -20,11 +20,6 @@ Watch the complete walkthrough here:
   />
 </a>
 
-# Lab Objective
-
-The goal of this lab is to demonstrate that MuleSoft gRPC support is not just about consuming an external gRPC service.
-<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/141b8202-1b41-428a-89e0-2cfbee3b0193" />
-
 ---
 # gRPC, RPC Paterns, HTTP/2, and ALPN
 
